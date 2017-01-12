@@ -14555,7 +14555,7 @@ var WorkerClient = function(topLevelNamespaces, packagedJs, mod, classname) {
     this.changeListener = this.changeListener.bind(this);
 
     if (config.get("packaged")) {
-        this.$worker = new Worker(config.get("workerPath") + "/" + packagedJs);
+        this.$worker = new Worker(config.get("workerPath") + packagedJs);
     }
     else {
         var workerUrl;
