@@ -1,50 +1,11 @@
 /*global $, ace, console*/
 $('document').ready(function () {
+  var isBootstrap2 = JSONForm.isBootstrap2 = location.pathname.indexOf('bootstrap3') < 0;
   var formObject = {
     schema: {
       example: {
         title: 'JSON Form example to start from',
         type: 'string',
-        'enum': [
-          'gettingstarted',
-          'schema-basic',
-          'schema-morecomplex',
-          'schema-array',
-          'fields-common',
-          'fields-password',
-          'fields-textarea',
-          'fields-ace',
-          'fields-color',
-          'fields-checkbox',
-          'fields-checkboxes',
-          'fields-select',
-          'fields-radios',
-          'fields-radiobuttons',
-          'fields-range',
-          'fields-imageselect',
-          'fields-fieldset',
-          'fields-advancedfieldset',
-          'fields-authfieldset',
-          'fields-section',
-          'fields-actions',
-          'fields-array',
-          'fields-tabarray',
-          'fields-tabarray-maxitems',
-          'fields-tabarray-value',
-          'fields-selectfieldset',
-          'fields-selectfieldset-key',
-          'fields-submit',
-          'fields-help',
-          'fields-hidden',
-          'fields-questions',
-          'templating-idx',
-          'templating-value',
-          'templating-values',
-          'templating-tpldata',
-          'events',
-          'previousvalues',
-          'factory-sleek'
-        ],
         'default': 'gettingstarted'
       },
       greatform: {
@@ -58,14 +19,19 @@ $('document').ready(function () {
         notitle: true,
         prepend: 'Try with',
         htmlClass: 'trywith',
-        titleMap: {
+        type: 'select',
+        options: {
           'gettingstarted': 'Getting started',
           'schema-basic': 'JSON Schema - A basic example',
           'schema-morecomplex': 'JSON Schema - Slightly more complex example',
           'schema-array': 'JSON Schema - Arrays',
+          'schema-required': 'JSON Schema - Required field',
+          'schema-default': 'JSON Schema - Default values',
+          'schema-inline-ref': 'JSON Schema - Inline $ref to definitions',
           'fields-common': 'Fields - Common properties',
           'fields-password': 'Fields - Gathering secrets: the password type',
           'fields-textarea': 'Fields - Large text: the textarea type',
+          'fields-text-autocomplete': 'Fields - Text field with jquery-ui autocomplete',
           'fields-ace': 'Fields - Code (JavaScript, JSON...): the ace type',
           'fields-color': 'Fields - Color picker: the color type',
           'fields-checkbox': 'Fields - Boolean flag: the checkbox type',
@@ -73,8 +39,10 @@ $('document').ready(function () {
           'fields-select': 'Fields - Selection list: the select type',
           'fields-radios': 'Fields - A list of radio buttons: the radios type',
           'fields-radiobuttons': 'Fields - Radio buttons as real buttons: the radio buttons type',
+          'fields-checkboxbuttons': 'Fields - Checkbox buttons: the checkbox buttons type',
           'fields-range': 'Fields - Number: the range type',
           'fields-imageselect': 'Fields - Image selector: the imageselect type',
+          'fields-iconselect': 'Fields - Icon selector: the iconselect type',
           'fields-fieldset': 'Fields - Grouping: the fieldset type',
           'fields-advancedfieldset': 'Fields - Advanced options section: the advancedfieldset type',
           'fields-authfieldset': 'Fields - Authentication settings section: the authfieldset type',
@@ -96,6 +64,7 @@ $('document').ready(function () {
           'templating-tpldata': 'Templating - Using the tpldata property',
           'events': 'Using event handlers',
           'previousvalues': 'Using previously submitted values',
+          'previousvalues-multi-array': 'Using previously submitted values - Multidimensional Arrays',
           'factory-sleek': 'Joshfire Factory - Sleek template'
         },
         onChange: function (evt) {
@@ -133,6 +102,8 @@ $('document').ready(function () {
     for (var i = 0; i < vars.length; i++) {
       param = vars[i].split('=');
       if (param[0] === 'example') {
+        if (param[1].slice(-1) == '/')
+          return param[1].slice(0, -1);
         return param[1];
       }
     }
@@ -143,8 +114,9 @@ $('document').ready(function () {
    * Loads and displays the example identified by the given name
    */
   var loadExample = function (example) {
+    var exampleDir = !isBootstrap2 ? '../examples/' : 'examples/';
     $.ajax({
-      url: 'examples/' + example + '.json',
+      url: exampleDir + example + '.json',
       dataType: 'text'
     }).done(function (code) {
       var aceId = $('#form .ace_editor').attr('id');
