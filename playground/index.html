@@ -2,13 +2,22 @@
 <html>
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width">
     <title>JSON Form Playground</title>
     <style>
-      @import url("../deps/opt/bootstrap.css");
-      @import url("../deps/opt/spectrum.css");
-      @import url("../deps/opt/jquery.ui.custom.css");
-      @import url("../deps/opt/jquery.ui.theme.css");
-      @import url("../deps/opt/bootstrap-tagsinput.css");
+      @import url("https://gitcdn.xyz/repo/evancohen/jsonform/master/deps/opt/bootstrap.css");
+      @import url("https://gitcdn.xyz/repo/evancohen/jsonform/master/deps/opt/spectrum.css");
+
+      /* hidden on default */
+      div#popup { display: none; text-align: center; padding: 10px; }
+
+
+      /* use a media query to filter small devices */
+      @media only screen and (max-device-width:768px) {
+      /* show the popup */
+      div#popup { display: block; }
+      div#container {display:none;}
+      }
 
       h2 { font-weight: 200; }
       .navbar-inner {
@@ -16,7 +25,7 @@
         -moz-border-radius: 0;
         border-radius: 0;
       }
-      .row-fluid: { margin: 0.5em; }
+      .row-fluid { margin: 0.5em; }
       .tagline {
         padding: 10px;
         font-weight: 200;
@@ -27,11 +36,13 @@
       .navbar .factory a {
         display: block;
         padding: 10px 20px 10px;
-        background: url(http://factory.joshfire.com/css/images/topbar-beta-logo.png) 22px -3px no-repeat;
+        background: url(images/logo.png) 20px -4px no-repeat;
         text-indent: -9999px;
         width: 178px;
       }
-
+      .next-to {
+        display: relative;
+      }
       .footer {
         margin-top: 40px;
         padding: 10px 0.5em;
@@ -68,68 +79,54 @@
         color: red;
         padding-top: 1em;
       }
-      .inline-other-field > .other-field-content,
-      .inline-other-field > label > .other-field-content {
-        display: inline-block;
-        margin: 0;
-      }
-      .inline-other-field > input[type=checkbox],
-      .inline-other-field > label > input[type=checkbox] {
-        margin-top: 8px;
-      }
-      .other-field-content > .control-group,
-      .other-field-content > .control-group > .controls > input[type=text] {
-        margin: 0;
-      }
     </style>
   </head>
   
   <body>
-    <div class="navbar navbar-inverse">
-      <div class="navbar-inner">
-        <div class="container">
-          <a class="brand" href="#">JSON Form Playground</a>
-          <div>
-            <ul class="nav">
-              <li><a href="#">Home</a></li>
-              <li><a href="http://github.com/joshfire/jsonform/wiki">Documentation</a></li>
-              <li><a href="http://github.com/joshfire/jsonform">Project on github</a></li>
-            </ul>
-            <ul class="nav pull-right">
-              <li class="factory"><a href="http://factory.joshfire.com">Joshfire Factory</a>
-            </ul>
+    <div id="container">
+      <div class="navbar navbar-inverse">
+        <div class="navbar-inner">
+          <div class="container">
+            <a class="brand" href="#">JSON Form Playground</a>
+            <div>
+              <ul class="nav">
+                <li><a href="#">Home</a></li>
+                <li><a href="http://github.com/joshfire/jsonform/wiki">Documentation</a></li>
+                <li><a href="http://github.com/evancohen/jsonform">Project on github</a></li>
+              </ul>
+              <ul class="nav pull-right">
+                <li class="factory"></li>
+              </ul>
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <div class="tagline">
-      <p>Choose a JSON Form example below and check the generated form. Refer to the <a href="http://github.com/joshfire/jsonform/wiki">documentation</a> for details and directions to extend the form.</p>
-    </div>
-
-    <div class="row-fluid">
-      <div class="span5">
-        <form id="form" class="form-vertical"></form>
+      <div class="tagline">
+        <p>Choose a JSON Form example below and check the generated form. Refer to the <a href="http://github.com/joshfire/jsonform/wiki">documentation</a> for details and directions to extend the form.</p>
       </div>
-      <div class="span7">
-        <h2>Generated form</h2>
-        <div id="result" class="well">(please wait)</div>
+      <div class="row-fluid">
+        <div class="span7">
+          <form id="form" class="form-vertical"></form>
+        </div>
+        <div class="span5">
+          <h2>Generated form</h2>
+          <div id="result" class="well">(please wait)</div>
+        </div>
       </div>
     </div>
-
+    <div id="popup">
+      <h1> This page cannot be viewed on a mobile device</h1>
+      <p>While this page will technically work on a tablet in landscape orientation over 768 pixels wide, such as an iPad.</BR>
+       It works best on a full-size computer. This is tool is intended to make creating the form schema easier on you. Using any kind of mobile device defeats that purpose.</p>
+    </div>
     <footer class="footer">
-      <p>Manufactured on the assembly line by <a href="http://factory.joshfire.com">Joshfire Factory</a> workers.</p>
-      <p><a href="http://github.com/joshfire/jsonform" title="JSON Form library code">Code</a> available on github, licensed under the <a href="https://raw.github.com/joshfire/jsonform/master/LICENSE">MIT License</a>.</p>
-      <p>See <a href="https://github.com/joshfire/jsonform/wiki#wiki-deps">dependencies</a> for the list of libraries and licenses used by JSON Form.</p>
+      <p>Originally created by <a href="http://factory.joshfire.com">joshfire Factory</a> workers. Then cleverly adapted for <a href="https://smart-mirror.io">Smart-Mirror</a> Development</p>
     </footer>
     
     <script src="../deps/jquery.min.js"></script>
     <script src="../deps/underscore-min.js"></script>
     <script src="../deps/opt/ZSchema-browser.js"></script>
-    <!--script src="../deps/opt/jquery.ui.core.js"></script>
-    <script src="../deps/opt/jquery.ui.widget.js"></script>
-    <script src="../deps/opt/jquery.ui.mouse.js"></script>
-    <script src="../deps/opt/jquery.ui.sortable.js"></script-->
     <script src="../deps/opt/jquery.ui.custom.js"></script>
     <script src="../deps/opt/bootstrap-dropdown.js"></script>
     <script src="../deps/opt/bootstrap-typeahead.js"></script>

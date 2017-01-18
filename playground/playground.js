@@ -1,12 +1,84 @@
 /*global $, ace, console*/
+
 $('document').ready(function () {
-  var isBootstrap2 = JSONForm.isBootstrap2 = location.pathname.indexOf('bootstrap3') < 0;
+  var cdn = {example:"speech/config.schema",branch:"master",repo:"evancohen"}
+    cdn.url = function(){
+    	if (this.example && this.branch && this.repo){
+        this.refresh()
+        return 'https://gitcdn.xyz/repo/' + this.repo + '/smart-mirror/' + this.branch + "/plugins/" + this.example + '.json'
+      } else {
+        this.refresh()
+        return 'https://gitcdn.xyz/repo/evancohen/smart-mirror/master/plugins/speech/config.schema.json'
+      }
+    }
+    cdn.refresh = function(a,b){
+    var query = window.location.search.substring(1);
+    var vars = query.split('&');
+    var param = null;
+    for (var i = 0; i < vars.length; i++) {
+      param = vars[i].split('=');
+          this[param[0]] = param[1]
+    }
+    if (a && b){this[a]=b}
+    if (history) {
+    history.pushState(
+      {example:this.example},
+      "Example - " + this.example,
+      `?example=` + this.example + '&repo='+this.repo+'&branch='+this.branch)
+    }
+
+    }
   var formObject = {
     schema: {
+      repo: {
+       title: 'Repo',
+       type: 'string',
+       enum: [
+           'evancohen',
+           'other'
+       ]
+      },
+      repoOther: {
+       title: 'Other Repo',
+       type: 'string'
+      },
+      branch: {
+       title: 'Branch',
+       type: 'string',
+       enum: [
+           "master",
+           "dev",
+           "other"
+       ]
+      },
+      branchOther: {
+       title: 'branch',
+       type: 'string'
+      },
       example: {
         title: 'JSON Form example to start from',
         type: 'string',
-        'default': 'gettingstarted'
+        'enum': [
+			"autosleep/config.schema",
+			"calendar/config.schema",
+			"geolocation/config.schema",
+			"giphy/config.schema",
+			"greeting/config.schema",
+			"light/config.schema",
+			"maker/config.schema",
+			"remote/config.schema",
+			"rss/config.schema",
+			"scrobbler/config.schema",
+			"search/config.schema",
+			"soundcloud/config.schema",
+			"speech/config.schema",
+			"stock/config.schema",
+			"traffic/config.schema",
+			"tvshows/config.schema",
+			"weather/config.schema",
+			"_general/config.schema"
+		],
+        'default': 'speech/config.schema'
       },
       greatform: {
         title: 'JSON Form object to render',
@@ -15,67 +87,124 @@ $('document').ready(function () {
     },
     form: [
       {
+        key: 'repo',
+        type: 'selectfieldset',
+        titleMap: {
+            "evancohen":"evancohen",
+            "other":"other"
+        },
+        items: [
+            {
+              type:"section",
+              items: [
+                    {
+                      key:"repoOther",
+                      type:"hidden"
+                    }
+                  ]
+            },
+            {
+              type:"section",
+              items:[
+                {
+                  key:"repoOther",
+                  htmlClass: "next-to",
+                  onChange: function (evt) {
+                    var selected = $(evt.target).val();
+                    cdn.refresh("repo",selected)
+                    loadExample();
+                  }
+                }
+              ]
+            }
+          ],
+          onChange: function (evt) {
+              var selected = $(evt.target).val();
+              if (selected != "other"){
+                cdn.refresh("repo",selected)
+                loadExample();
+              }
+          }
+      },
+      {
+        key: "branch",
+        type: 'selectfieldset',
+        titleMap: {
+            "master":"master",
+            "dev": "dev",
+            "other":"other"
+        },
+        items: [
+            {
+              type:"section",
+              items: [
+                    {
+                      key:"branchOther",
+                      type:"hidden"
+                    }
+                  ]
+            },
+            {
+              type:"section",
+              items: [
+                    {
+                      key:"branchOther",
+                      type:"hidden"
+                    }
+                  ]
+            },
+            {
+              type:"section",
+              items:[
+                {
+                  key:"branchOther",
+                  onChange: function (evt) {
+                      var selected = $(evt.target).val();
+                      cdn.refresh("branch",selected)
+                      loadExample();
+                  }
+                },
+              ]
+            }
+          ],
+          onChange: function (evt) {
+              var selected = $(evt.target).val();
+              if (selected != "other"){
+                cdn.refresh("branch",selected)
+                loadExample();
+              }
+          }
+      },
+      {
         key: 'example',
         notitle: true,
         prepend: 'Try with',
         htmlClass: 'trywith',
-        type: 'select',
-        options: {
-          'gettingstarted': 'Getting started',
-          'schema-basic': 'JSON Schema - A basic example',
-          'schema-morecomplex': 'JSON Schema - Slightly more complex example',
-          'schema-array': 'JSON Schema - Arrays',
-          'schema-required': 'JSON Schema - Required field',
-          'schema-default': 'JSON Schema - Default values',
-          'schema-inline-ref': 'JSON Schema - Inline $ref to definitions',
-          'fields-common': 'Fields - Common properties',
-          'fields-password': 'Fields - Gathering secrets: the password type',
-          'fields-textarea': 'Fields - Large text: the textarea type',
-          'fields-text-autocomplete': 'Fields - Text field with jquery-ui autocomplete',
-          'fields-ace': 'Fields - Code (JavaScript, JSON...): the ace type',
-          'fields-color': 'Fields - Color picker: the color type',
-          'fields-checkbox': 'Fields - Boolean flag: the checkbox type',
-          'fields-checkboxes': 'Fields - Multiple options: the checkboxes type',
-          'fields-select': 'Fields - Selection list: the select type',
-          'fields-radios': 'Fields - A list of radio buttons: the radios type',
-          'fields-radiobuttons': 'Fields - Radio buttons as real buttons: the radio buttons type',
-          'fields-checkboxbuttons': 'Fields - Checkbox buttons: the checkbox buttons type',
-          'fields-range': 'Fields - Number: the range type',
-          'fields-imageselect': 'Fields - Image selector: the imageselect type',
-          'fields-iconselect': 'Fields - Icon selector: the iconselect type',
-          'fields-fieldset': 'Fields - Grouping: the fieldset type',
-          'fields-advancedfieldset': 'Fields - Advanced options section: the advancedfieldset type',
-          'fields-authfieldset': 'Fields - Authentication settings section: the authfieldset type',
-          'fields-section': 'Fields - Generic group: the section type',
-          'fields-actions': 'Fields - Group of buttons: the actions type',
-          'fields-array': 'Fields - Generic array: the array type',
-          'fields-tabarray': 'Fields - Arrays with tabs: the tabarray type',
-          'fields-tabarray-maxitems': 'Fields - Arrays with tabs: the tabarray type w/ maxItems',
-          'fields-tabarray-value': 'Fields - Arrays with tabs: the tabarray type w/ default & legend',
-          'fields-selectfieldset': 'Fields - Alternative: the selectfieldset type',
-          'fields-selectfieldset-key': 'Fields - Alternative with schema key',
-          'fields-submit': 'Fields - Submit the form: the submit type',
-          'fields-help': 'Fields - Guide users: the help type',
-          'fields-hidden': 'Fields - Hidden form values: the hidden type',
-          'fields-questions': 'Fields - Series of questions: the questions type',
-          'templating-idx': 'Templating - item index with idx',
-          'templating-value': 'Templating - tab legend with value and valueInLegend',
-          'templating-values': 'Templating - values.xxx to reference another field',
-          'templating-tpldata': 'Templating - Using the tpldata property',
-          'events': 'Using event handlers',
-          'previousvalues': 'Using previously submitted values',
-          'previousvalues-multi-array': 'Using previously submitted values - Multidimensional Arrays',
-          'factory-sleek': 'Joshfire Factory - Sleek template'
+        titleMap: {
+          "autosleep/config.schema":"AutoSleep Form Section Example",
+          "calendar/config.schema":"Calendar Form Section Example",
+          "geolocation/config.schema":"GeoLocation Form Section Example",
+          "giphy/config.schema":"Giphy Form Section Example",
+          "greeting/config.schema":"Greeting Form Section Example",
+          "light/config.schema":"Light Form Section Example",
+          "maker/config.schema":"Maker Form Section Example",
+          "remote/config.schema":"Remote Form Section Example",
+          "rss/config.schema":"RSS Form Section Example",
+          "scrobbler/config.schema":"Scrobbler Form Section Example",
+          "search/config.schema":"Search Form Section Example",
+          "soundcloud/config.schema":"SoundCloud Form Section Example",
+          "speech/config.schema":"Speech Form Section Example",
+          "stock/config.schema":"Stock Form Section Example",
+          "traffic/config.schema":"Traffic Form Section Example",
+          "tvshows/config.schema":"TV Shows Form Section Example",
+          "weather/config.schema":"weather Form Section Example",
+          "_general/config.schema":"General Form Section Example"
         },
         onChange: function (evt) {
           var selected = $(evt.target).val();
-
-          loadExample(selected);
-          if (history) history.pushState(
-            { example: selected},
-            'Example - ' + selected,
-            '?example=' + selected);
-        }
+          cdn.refresh("example",selected)
+          loadExample();
+        }   
       },
       {
         key: 'greatform',
@@ -87,8 +216,33 @@ $('document').ready(function () {
         onChange: function () {
           generateForm();
         }
+      },
+      {
+          "type":"button",
+          "title": "Save config.schema.json"
+    }
+    ],
+        "onSubmitValid": function (values) {
+          var hiddenElement = document.createElement('a');
+          var schemaJson = values.greatform
+          var defaultJson = schemaJson.value
+          delete schemaJson.value
+          downloadFile(schemaJson,"config.schema.json")
+          function downloadFile(fileContent, fileName){
+          hiddenElement.href = 'data:attachment/text,' + encodeURI(fileContent);
+          hiddenElement.target = '_blank';
+          hiddenElement.download = fileName;
+          hiddenElement.click();
+          }
+      },
+        "onSubmit": function (errors, values) {
+          if (errors) {
+            console.log('Validation errors', errors);
+            return false;
+          }
+          return true;
       }
-    ]
+    
   };
 
 
@@ -97,26 +251,23 @@ $('document').ready(function () {
    */
   var getRequestedExample = function () {
     var query = window.location.search.substring(1);
+
     var vars = query.split('&');
     var param = null;
     for (var i = 0; i < vars.length; i++) {
       param = vars[i].split('=');
-      if (param[0] === 'example') {
-        if (param[1].slice(-1) == '/')
-          return param[1].slice(0, -1);
-        return param[1];
-      }
+          cdn[param[0]] = param[1]
     }
-    return null;
+    return cdn.url();
   };
+
 
   /**
    * Loads and displays the example identified by the given name
    */
-  var loadExample = function (example) {
-    var exampleDir = !isBootstrap2 ? '../examples/' : 'examples/';
+  var loadExample = function () {
     $.ajax({
-      url: exampleDir + example + '.json',
+      url: getRequestedExample(),
       dataType: 'text'
     }).done(function (code) {
       var aceId = $('#form .ace_editor').attr('id');
@@ -159,7 +310,8 @@ $('document').ready(function () {
       createdForm.onSubmitValid = function (values) {
         if (console && console.log) {
           console.log('Values extracted from submitted form', values);
-        }
+          console.log(JSON.stringify(values, null, 2))
+      }
         window.alert('Form submitted. Values object:\n' +
           JSON.stringify(values, null, 2));
       };
@@ -170,6 +322,8 @@ $('document').ready(function () {
         }
         return true;
       };
+      createdForm.form.push({"type":"button","title":"Submit"})
+      console.log('items in createdForm',createdForm)
       $('#result').html('<form id="result-form" class="form-vertical"></form>');
       $('#result-form').jsonForm(createdForm);
     }
@@ -186,11 +340,11 @@ $('document').ready(function () {
 
   // Wait until ACE is loaded
   var itv = window.setInterval(function() {
-    var example = getRequestedExample() || 'gettingstarted';
+    var example = getRequestedExample();
     $('.trywith select').val(example);
     if (window.ace) {
       window.clearInterval(itv);
-      loadExample(example);
+      loadExample();
     }
   }, 1000);
 });
