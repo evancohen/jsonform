@@ -220,7 +220,7 @@ $('document').ready(function () {
       {
           "type":"button",
           "title": "Save config.schema.json"
-    }
+      }
     ],
         "onSubmitValid": function (values) {
           var hiddenElement = document.createElement('a');
