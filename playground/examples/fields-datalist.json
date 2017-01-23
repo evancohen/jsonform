@@ -1,0 +1,20 @@
+{
+  "schema": {
+    "gender": {
+      "type": "string",
+      "title": "Gender",
+      "enum": [ "male", "female", "alien" ]
+    }
+  },
+  "form": [
+    {
+      "key": "gender",
+      "type":"datalist",
+      "titleMap": {
+        "male": "Dude",
+        "female": "Dudette",
+        "alien": "I'm from outer space!"
+      }
+    }
+  ]
+}
